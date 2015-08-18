@@ -1,0 +1,332 @@
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[a4paper]{report}
+
+
+\usepackage[sc]{mathpazo}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage[frenchb]{babel}
+\linespread{1.05}
+\usepackage{microtype}
+
+\usepackage[hang, small,labelfont=bf,up,textfont=it,up]{caption}
+\usepackage[top=4cm, bottom=4cm, left=4cm, right=4cm]{geometry} 
+\usepackage{booktabs}
+\usepackage{float} 
+\usepackage{hyperref}
+
+\usepackage{graphicx}
+\usepackage{listings}
+
+%% Usefull for \FloatBarrier
+\usepackage{placeins}
+
+\usepackage{lettrine}
+\usepackage{paralist}
+\usepackage{setspace}
+
+\usepackage{abstract}
+\renewcommand{\abstractnamefont}{\normalfont\bfseries}
+\renewcommand{\abstracttextfont}{\normalfont\small\itshape}
+
+\usepackage{color}
+\usepackage{xcolor}
+\usepackage{titlesec}
+%% \renewcommand\thesection{\Roman{section}}
+%% \renewcommand\thesubsection{\Roman{subsection}}
+\titleformat{\chapter}[hang]{\bf\huge}{}{2pc}{} 
+\titleformat{\section}[block]{\Large\vspace{0.5cm}}{}{1em}{}
+\titleformat{\subsection}[block]{\large\vspace{0.3cm}}{}{1em}{}
+
+\setcounter{tocdepth}{2}
+
+\newcommand{\ds}{\emph{\mbox{DataStax }}}
+\newcommand{\djd}{\emph{DataStax Java Driver }}
+\newcommand{\ca}{\emph{Apache Cassandra }}
+\newcommand{\px}{\emph{Paxos }}
+\newcommand{\jd}{\emph{Java driver }}
+
+\lstset{
+         basicstyle=\footnotesize\ttfamily, % Standardschrift
+         numbers=left,               % Ort der Zeilennummern
+         numberstyle=\tiny,          % Stil der Zeilennummern
+         stepnumber=2,               % Abstand zwischen den Zeilennummern
+         numbersep=5pt,              % Abstand der Nummern zum Text
+         tabsize=2,                  % Groesse von Tabs
+         extendedchars=true,         %
+         breaklines=true,            % Zeilen werden Umgebrochen
+            frame=b,         
+ %        keywordstyle=[1]\textbf,    % Stil der Keywords
+ %        keywordstyle=[2]\textbf,    %
+ %        keywordstyle=[3]\textbf,    %
+ %        keywordstyle=[4]\textbf,   \sqrt{\sqrt{}} %
+         stringstyle=\color{white}\ttfamily, % Farbe der String
+         showspaces=false,           % Leerzeichen anzeigen ?
+         showtabs=false,             % Tabs anzeigen ?
+         xleftmargin=17pt,
+         framexleftmargin=17pt,
+         framexrightmargin=5pt,
+         framexbottommargin=4pt,
+         %backgroundcolor=\color{lightgray},
+         showstringspaces=false      % Leerzeichen in Strings anzeigen ?        
+ }
+ \lstloadlanguages{
+         %[Visual]Basic
+         %Pascal
+         %C
+         %C++
+         %XML
+         %HTML
+         %Java
+         SQL
+ }
+
+\DeclareCaptionFont{white}{\color{white}}
+\DeclareCaptionFormat{listing}{\colorbox{gray}{\parbox{\textwidth}{#1#2#3}}}
+\captionsetup[lstlisting]{format=listing,labelfont=white,textfont=white}
+
+
+	
+
+
+%%%%%%%%%%%%%DOCUMENT%%%%%%%%%%%%%%%
+
+\begin{document}
+
+\begin{titlepage}
+
+\newcommand{\HRule}{\rule{\linewidth}{0.5mm}} % Defines a new command for the horizontal lines, change thickness here
+
+\center % Center everything on the page
+ 
+%----------------------------------------------------------------------------------------
+%	HEADING SECTIONS
+%----------------------------------------------------------------------------------------
+
+\textsc{\LARGE University Pierre et Marie Curie}\\[1.5cm] % Name of your university/college
+\textsc{\Large Internship Inter-Report}\\[0.5cm] % Major heading such as course name
+\textsc{\large Master's degree}\\[0.5cm] % Minor heading such as course title
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\HRule \\[0.4cm]
+{ \huge \bfseries Java Driver for Apache Cassandra}\\[0.4cm] % Title of your document
+\HRule \\[1.5cm]
+ 
+%----------------------------------------------------------------------------------------
+%	AUTHOR SECTION
+%----------------------------------------------------------------------------------------
+
+\begin{minipage}{0.4\textwidth}
+\begin{flushleft} \large
+\emph{Author:}\\
+Kevin \textsc{Gallardo} % Your name
+\end{flushleft}
+\end{minipage}
+~
+\begin{minipage}{0.4\textwidth}
+\begin{flushright} \large
+\emph{Supervisors :} \\
+University : Sebastien \textsc{Monnet} \\
+Company : Shannon \textsc{Dennis} % Supervisor's Name
+\end{flushright}
+\end{minipage}\\[4cm]
+
+%----------------------------------------------------------------------------------------
+%	DATE SECTION
+%----------------------------------------------------------------------------------------
+
+{\large \today}\\[3cm] % Date, change the \today to a set date if you want to be precise
+
+
+\vfill % Fill the rest of the page with whitespace
+
+\end{titlepage}
+
+
+%%%%%%%%%%%%%%%%%%%%CONTENT%%%%%%%%%%%%%%%
+
+
+\chapter{Introduction}
+
+\pagestyle{plain}
+\lettrine[nindent=0em,lines=3]{T} his inter-report describes the content of this internship made at \ds, UK, London. The internship was supervised by Shannon Dennis (Senior Director Engineer) and Olivier Michallat (Software Engineer) on the \ds side, by Sebastien Monnet (Associate Professor) and Julien Sopena (Associate Professor) on the University side.\\
+The intern will be joining the Drivers and Tools Developers Team. The main tasks will be to contribute to the \djd for \ca, he will help develop new features in the Driver, fix found issues, execute performance tests and resolve performance issues.\\
+In this inter-report I will first make a description of \ca including some additional research work on software technologies used by \ca. Then, I will make a description of how the \djd works. After that I will describe the tasks currently achieved. I will finally conclude with making statement on what is envisaged to do for the rest of this internship.
+
+\chapter{Apache Cassandra}
+\lettrine[nindent=0em,lines=3]{A} pache Cassandra is a distributed No-SQL database created by \emph{Facebook} providing high availability and scalability, developed to handle heavy workload produced by their large amount of users and data. \ca has a master/slave-free architecture which allows it to provide linear scalability and helps instant recovery on hardware and software failures.\\
+The purpose in the following is not to make an entire technical description of \ca since on the one hand, the internship doesn't involve me on the internal development of \ca. On the other hand, understanding all concepts of \ca is crucial to be able to handle correctly the interaction with an \ca cluster and thus, be as efficient as possible in the development of the \djd.
+
+\section{General Concept}
+With \ca, each node on a cluster of machines is responsible of a part of the data. Thus, a set of data is represented by a Partition Key, and this Partition Key indicates on which node it will be stored, since at each node is attributed the responsibility of a range of Partition Keys. The data can (and is supposed to) be replicated among other nodes with a coefficient of replication that involves differents policies of consistency and load balancing. All \ca nodes will then refer to these policies to manage data among all other nodes.\\
+Wrtiting on a replicated data introduce consistency challenges and is handled in \ca by broadcasting the \verb;write; operations on all replicas and then waiting on a quorum of replicas to confirm that changes have been applied. A default setting on an \ca node is to set this quorum's size to \emph{N/2} (N is the number of nodes owning a replica of the data). \verb;Reads; on replicated data can be configured according to the client's requirements. Each Cassandra node is aware of all the other nodes, and each node is responsible of the replication of the data in his range of Partition Keys.
+
+\section{Advanced Description}
+The following section will describe more precisely some of the key features that allows \ca to achieve its high availability and scalability characteristics. We will also make some comparison with other database systems that have different behaviors regarding these characteristics.
+\subsection{Transactions}
+\ca version 2.0 introduced a system to handle distributed transactions which, for instance allows clients using CQL operations like :
+\vspace{0.7cm}
+\begin{lstlisting}[label=cql-ex-1, caption=CQL Update Example, language=SQL]
+UPDATE ExampleTable
+SET variable = NEW_VAL
+IF variable = OLD_VAL;
+\end{lstlisting}
+\vspace{0.7cm}
+This \emph{IF} condition may not be a big constraint when developing a relational database, but with a fully distributed database, this precondition causes several complications : 
+\begin{itemize}
+	\item How to achieve linearizability and consistency with distributed transactions ? Use Consensus.
+	\item How to keep an acceptable throughput with a Consensus algorithm ? \px\cite{Lamport1}.
+\end{itemize}
+{\bfseries But}, building these types of transactions involved the need to add some extra-phases to the original \px algorithm. Here we won't recall \px's proofs that define the Consensus guaranties when a majority of nodes responds positively in the \emph{Accept} phase. But original \px algorithm allows to agree on one value that won't be changed, besides that, what we want to do in \ca is to achieve linearizibility on a suite of operations (or we can say 'values'). Nodes would then be sure of the consistency of the data since every node would have executed operations on its replica in the same order. \\
+To do so, a node must find a way to 'restart' the algorithm in order to make a new decision on another value and chain the algorithm executions. First way to do that would be to build a distributed edit log file based on successive Consensuses made with \px (a brief review of \emph{Google}'s solution to do that later). To chain \px execution in \ca the idea has been to add an extra phase to the algorithm called \emph{commit} phase which simply sends \emph{commit} messages to all nodes to notify them the end of the algorithm.\\
+Another point about using \px algorithm in our context is that our need is to execute a \emph{compare-and-set-like} operation, whereas \px algorithm allows to only \emph{set} a value without making the comparison. \\
+Making this possible implied adding another extra-phase to the original \px algorithm, which is, after receiving a majority of responses from the \emph{prepare} phase. The newly decided coordinator will send a request to all nodes to get their local value of the replica. If the expected value match, the node proceeds to the following of the algorithm (\emph{accept}), if not, the algorithm stops and the value is not updated.
+With these solutions, \ca simply implements \emph{compare-and-set} distributed operations on multiple variables sequentially with the guaranties of the \px algorithm. With the cost of the overhead produced by the 2 extra-phases.
+
+\subsubsection{\emph{Google}'s distributed edit log file}
+\emph{Google}'s approach to build a distributed fault-tolerant database based on \px was described in their paper \emph{Paxos Made Live}. It actually explains that even if \px algorithm could be easily described in one page of algorithmic instructions, engineering a production-ready software based on it, is not so simple.\\
+Indeed, to be fault-tolerant an application has to rely on the hypothesis that a machine doesn't have unlimited memory, and that it can suffer of hard disk failures. Also, the implementation has to be adaptable to different hardware infrastructures since real systems are rarely specified precisely.\\
+The approach taken here was to build a \emph{fault-tolerant} log file that will be describe the operations to be applied on a replica of data. All the replicas hosts would then agree with \px's Consensus on the content of this log file and each one would keep locally a version of it. Building a file log of sequential operations implies to chain \px executions, which are called \emph{instances} (the same idea described earlier for \ca).\\
+In order to increase throughput and performance of the \emph{instances}, two additional concepts came up in the paper : 
+\begin{itemize}
+	\item When a coordinator sends data in an \emph{Accept} message, it can concern not only one variable, and update multiple set of variables. So when the \emph{Accept} message is acknowledged by a majority of nodes, all the values will be modified at the same time.
+	\item To avoid as much \emph{Propose} messages overhead as possible, the algorithm could state that a coordinator, once it has passed the \emph{Accept} phase with his value on a previous instance, can stay \emph{elected} for certain period of time. And thus, it can chain \emph{Accept} phases for as long as he is coordinator. He is then called \emph{master}. After that, when a node starts a new instance of \px algorithm, it first tries to grant a lease from the coordinator (\emph{master}) of the last instance and sets it as his coordinator for this new instance.
+\end{itemize}
+\emph{Master} leases doesn't corrupt the \px algorithm since a \emph{master} is elected it can fail, and after a certain period of time (\emph{heartbeats}), a new instance will be run and will elect a new \emph{master}.\\
+Besides that, \emph{master leases} improve performance with the fact that when a \emph{master} is elected by a majority of replicas, the \emph{compare} of a \emph{compare-and-set} operation on a \emph{master} can be done locally since once it knows that it has been elected, the \emph{master} knows no other node is going to acknowledge \emph{Propose} messages from another coordinator. Each time a \px instance is ran, replicas \emph{grant} a lease from the \emph{master} of the previous instance. For \emph{Google}, this implementation of \px was used as backend of \emph{Chubby}, a \emph{fault-tolerant master-slave} distributed locking system which during its computation stores \emph{Chubby} lock files in a distributed database with replication, and that was then, using this implementation of \px. This way, \emph{Chubby masters} and \emph{Paxos masters} could be correlated to improve throughput of the application.\\
+Since the log file concerns actions to be applied on a certain data structure, the data structure's history has to be saved, so as for the log file, in case of when a replica fails and has to recover. To handle limited memory restrictions, persistent state's history has been achieved by making \emph{snapshots}. With a proper \emph{snapshot} algorithm the data could be saved in a period of time related to the memory capacity and the \\
+log file can also be truncated since it only needs to contain the operations executed since the last \emph{snapshot}.\\
+Implementing these concepts and other technical details allowed to build distributed fault tolerant database relying on \px.
+
+\subsection{\ca local persistence} % (fold)
+\label{sub:ca_local_persitency}
+
+To achieve local persistence of writes on data in the most efficient way, \ca rely on some principles that helps acquiring better performance and safety.\\
+Each write operation involves a new entry in a local commit file. The write in this file is persisted and it is assumed in \emph{Facebook}'s paper on \emph{Cassandra} that this commit file is stored on a dedicated hard disk used only for this purpose, to maximize throughput in regard of the sequential constraints of this one.\\
+To optimize response time on a \emph{read} request, \ca first does a lookup in the in-memory data structure of most recent data, and if not present, do a lookup on persistent storage. Data is stored in many files on a disk, (ordered from newest to oldest) each part of the data represented by a key. To prevent browsing files that do not contain the needed key, each file owns an index which describes all the keys the file is composed of. This index is called \emph{bloom filter}.
+
+% subsection ca_local_persitency (end)
+
+\subsection{Gossip membership protocol and possible ATTACKS!} % (fold)
+\label{sub:gossip_membership_protocol_and_potential_weaknesses}
+
+With \ca, since the data is distributed and replicated, each node maintains locally the situation it is aware of each other node in the \emph{ring} (the \emph{ring} represents the nodes organized according the distribution of the tokens). \\
+To maintain a coherent distribution of the tokens, in case of when a node fails, a membership protocol called \emph{Gossip protocol} runs regularly to keep the ring coherent. In short, this this protocol consists of : an \emph{initiator} node starting a \emph{gossip} round by sending a \emph{receiver} node his current view of all the nodes. The \emph{receiver} updates his view according to the initiator's view (assuming that there's a additional technical process that can insure that a view is more recent than another). And if the view also needs to be updated on the \emph{initiator}, the \emph{receiver} sends the updates in an \emph{ack} message. The \emph{initiator} then updates his views and acknowledges them to the \emph{receiver}.\\
+After explaining that this protocol brings a great benefit to the consistency of the system, we will see that some experiences proved that in some cases it can also become a weakness...\\
+This\cite{Aniello13} paper explains the vulnerabilities to such a protocol, stating that, in the \emph{gossip} protocol, there is no concern about the about what could happen if the information in these \emph{gossip} messages are false, corrupted. With this statement, we can imagine 2 types of of attacks involving a byzantine node that's purpose is to send wrong information among the network.\\
+A first \emph{attack} would be to make some nodes (even maybe all) believe that a node is \emph{down} while he is not. Sending a message to a \emph{receiver} node, falsely up-to-date, saying that a node is \emph{down} can lead the \emph{receiver} node to update his view with a wrong information. The second \emph{attack} is the opposite of the first one, a byzantine node waits for a node to fail, and while the node is failed, the byzantine one sends \emph{gossip} messages to every other saying that for it (the last updated view) the node is still up.\\
+This kind of \emph{attacks} can have a big impact on the performance of the database when there's big loads of data to handle. \\
+It could in the first case, contradict load balancing policies by lowering the usage of the \emph{faked} node, in the second case, involve a great number of lost requests. The paper reports a percentage of up to ~83\% of lost requests when disseminating up to 75\% byzantine nodes in the network, using the \emph{ALL} consistency level. It also describes a \emph{relatively low} performance impact solution to the excess of trust in the \emph{gossip} protocol. It consists in adding an encryption layer to the protocol, allowing to insure that information provided is not from a byzantine node. A little bit like Byzantine \px\cite{Martin}, with the cost of encryption.
+
+% subsection gossip_membership_protocol_and_potential_weaknesses (end)
+
+\chapter{Java Driver for Apache Cassandra}
+\lettrine[nindent=0em,lines=3]{T} he \djd defines a high level API to handle interaction with an \ca node. The \djd is based on the \emph{CQL} query language and communicates with a \ca using the \emph{Native Protocol}.
+\subsection{CQL}
+The \emph{CQL} query language is a database query language dedicated to \ca. Hence its goal is to fit the most possible to the existing universal \emph{SQL} query language, and in the same time providing \ca specific functionalities. With \emph{CQL} a client can then set specific replication factor when adding data or consistency level in a query.
+\subsection{Native protocol}
+The \emph{Native protocol} is a network applicative protocol built on \emph{TCP}. The \emph{Native protocol} is fully asynchronous, hence, on the driver side it allows to accumulate queries on a single connection without consistency issues. \emph{Native protocol} also allows security functionalities like authentication and SSL encryption.\\
+The \djd's task is to interact with a node by encoding and decoding messages from a node using the \emph{Native protocol}.
+\section{Connection}
+Connecting a client to a node with the driver is subject to many optimizations. To make a connection to a host, the top-level API for a client is to use an object named \emph{Session}. The \jd aggregates this object with Connections. When a \emph{session} is created, the driver established connections to all nodes of a cluster (discovering the list of hosts relies on the \emph{gossip}). In addition to that, the \jd creates a \emph{pool} of connections on each node. This is made for multiple purposes : if a connection is closed, we can rely on another connection from the pool to keep communicating with a node. Also, because the \emph{Native protocol} is asynchronous, we can pile up multiple requests on a connection, but with a limit number of maximum requests. If a client exceeds this limit, the pool provides another connection to enqueue new requests.\\
+Since the driver maintains connection on multiple hosts of a cluster of nodes, we can define policies to balance requests among all the nodes, and avoid bottlenecks.\\
+Getting together local connection informations to the hosts and \emph{gossip} informations helps keeping a consistent state of the nodes in the cluster. The driver also defines a set of different policies like \emph{retry on deconnection } policies.
+\section{Processing responses}
+The \emph{Native protocol} being fully asynchronous, a client has the possibility the process results of its queries either synchronously or asynchronously. Internally, everything is handled asynchronously, every request implies the creation of a \emph{Future} object from the Java API's Future interface. On these \emph{Futures} we define callbacks to fill the data when a connection notifies it's activity. Since internal processing in the driver is asynchronous, most part of the code is multi-threaded and thread-safe.
+
+\chapter{Achieved work}
+The main purpose of this internship at DataStax is to contribute to the active development of the open-source \djd for \ca. This includes aggregating the client's API with new functionalities to fit \ca functionalities, internal operation of the driver, improving Query Builder\footnote{Query Builder is a library developed for the Java Driver allowing clients to build query in an Object Oriented way. \textit{Example : Statement statement = QueryBuilder.select().all().from(keyspace, table);}} 
+and Object Mapper \footnote{Object Mapper is an Object Relational Mapping tool developed for the Java Driver.} 
+functions, resolving reported internal driver's issues and suggestions. I will then, give a brief description of some of the most significant tasks I have been working on since now. I have also been assigned to build a new \ds's tool called \emph{Cassandra Detection Tool} (described later).
+
+\section{Java-Driver}
+\subsection{Refactoring Integration Tests Class}
+The test architecture for the \djd is composed of both unit and integration test. Those test are ran 24/7 for continuous integration by \emph{Jenkins} servers. To simplify building these tests, a big number of integration tests are classes that extend an \emph{all-configured} class which has the responsibility to create the necessary connections and configurations with a test cluster using DataStax's specific tools for automating \ca cluster creation.\\
+The previous behavior was that inheriting this all-configured implied the need to recreate a new cluster each time. The process was simplified by creating a generic class that initiates a cluster and stays instanciated for all classes inheriting it, adding a thread-safe need for this class. Integration tests suite runs approximately 30\% faster.
+\subsection{Manual Paging}
+Requests on \ca that generate a large amount of data are transfered in network applicative frames called \emph{pages}. These pages are identified by \ca and are communicated through the \emph{Native protocol}. The goal of this improvement was to give client the possibility to handle themselves the \emph{paging state} of a request. Thanks to his \emph{paging state} the client start fetching some data from the server, stop processing, and re-send a new request but with the \emph{paging state} information which allows him to continue its processing from where he had stopped. Giving the possibility to the driver to be used in a entirely stateless environment. This task involved studying \emph{Native protocol} and gathering information by manually decoding frames, changing the internal use of the \emph{paging state} in the driver and understanding \ca's usage of the \emph{paging state}.
+\subsection{Asynchronous host pools creation} % (fold)
+\label{sub:asynchronous_host_pools_creation}
+
+Until now, creating a pool of connection to a \ca node was all made sequentially. Moreover, making an authenticated connection on a \ca cluster implies a certain overhead due to password verification. Therefore, when the driver has to make sequentially a pool of authenticated connections it could imply too much latency on a cluster with a large number of nodes.\\
+The solution was to make the pool creation entirely asynchronous. Thus, all connection pools are made in parallel, and the driver worker only have to wait for all connections to be established. Since we are in a HIGHLY concurrent part of code, lots of issues were produced when adding this feature and needed a big part of refactoring of code. Temporary tests report a improvement 8x the time for the driver to connect to a 40 nodes cluster.
+
+\section{Cassandra Detection Tool}
+\emph{Cassandra Detection Tool} is a software I have been asked to contribute to that's main function is to provide to customers all useful \ca information we can gather concerning a given a range of IPs. Customers owning a (\emph{very}) large number of clusters among its network sometimes isn't even sure how much nodes are running. \emph{Cassandra Detection Tool} makes then, a clean and concise description of the \ca instances. 
+A first prototype of the tool has been made by \emph{Martin Van Ryswyk}, our Executive Vice President in Engineering, and my work have been to build a final working solution of the software.\\
+It turned out that I changed almost all the code conserving the original conception design. Technically the process was to first, use asynchronous Java sockets to try to establish connection on all of the given IP, all tries made in parallel. Thanks to that the software could establish a list of UP nodes running a \ca instance. Moreover, the app use the \djd and  the \emph{Java Thrift API}\footnote{Apache Thrift is a network applicative protocol originally used for Cassandra but got replaced by the Native protocol because of performance issues and also because the Java API for Thrift was really hard to use and not well designed. It is still available (but not updated) and Deprecated but I use it here for compatibility with clusters potentially using an old version of Cassandra.}
+to connect to running hosts and gather all the node information possible. Information concerns : token map, cluster's hosts, keyspaces and all types of versions. To be more efficient in case of a \emph{big} list of hosts (we can aim for a class B network) to connect to, the application creates a dynamic sized thread pool and then tries to use drivers to gather information. Also, to avoid the need for a thread in the pool (\emph{worker}) to have to, let's say, send gathered information to a main worker that processes all the results and etc... the information was stored in \emph{static} (shared) data structures so it was highly concurrent because a certain number of nodes can be located on the same cluster, and modifying the list of nodes in this \emph{Cluster} object has to be doable concurrently. As a result, the code is thread-safe.\\
+It was great to have the opportunity to build this software on my own, and also I'll have the chance to make a video presentation to clients and sales team people on how to use the software (even though I tried to make a GUI as clean as possible).
+
+
+\chapter{What's next}
+For the following of the internship I will continue to contribute to the \jd bringing new functionalities and trying to understand more and more of its code in order to be able to handle more easily the development process.
+
+
+
+
+
+
+% subsection asynchronous_hosts_pool_creation (end)
+
+
+
+\input{biblio}
+
+
+
+\end{document}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
