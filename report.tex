@@ -27,6 +27,7 @@
 \usepackage{lettrine}
 \usepackage{paralist}
 \usepackage{setspace}
+\usepackage{graphicx}
 
 \usepackage{abstract}
 \renewcommand{\abstractnamefont}{\normalfont\bfseries}
@@ -35,6 +36,7 @@
 \usepackage{color}
 \usepackage{xcolor}
 \usepackage{titlesec}
+\usepackage{inconsolata}
 %% \renewcommand\thesection{\Roman{section}}
 %% \renewcommand\thesubsection{\Roman{subsection}}
 % \titleformat{\chapter}[hang]{\bf\huge}{}{2pc}{} 
@@ -50,6 +52,9 @@
 \newcommand{\jd}{\emph{Java driver\xspace}}
 \newcommand{\cdt}{\emph{Cassandra Detection Tool\xspace}}
 \newcommand{\dseg}{\emph{DSE Graph\xspace}}
+\newcommand{\om}{\emph{Object Mapper\xspace}}
+\newcommand{\sr}{\emph{speculative retries\xspace}}
+
 
 \lstset{
          basicstyle=\footnotesize\ttfamily, % Standardschrift
@@ -94,8 +99,9 @@
 \definecolor{javagreen}{rgb}{0.25,0.5,0.35} % comments
 \definecolor{javapurple}{rgb}{0.5,0,0.35} % keywords
 \definecolor{javadocblue}{rgb}{0.25,0.35,0.75} % javadoc
+\definecolor{pgrey}{rgb}{0.46,0.45,0.48}
 
-\lstset{language=Java,
+\lstdefinestyle{Java}{language=Java,
 basicstyle=\ttfamily,
 keywordstyle=\color{javapurple}\bfseries,
 stringstyle=\color{javared},
@@ -107,7 +113,9 @@ stepnumber=1,
 numbersep=7pt,
 tabsize=4,
 showspaces=false,
-showstringspaces=false}
+showstringspaces=false,
+moredelim=[is][\textcolor{pgrey}]{`}{`}
+}
 
 
 %%%%%%%%%%%%%DOCUMENT%%%%%%%%%%%%%%%
@@ -279,7 +287,7 @@ Aside from sending statements, and processing results, the \djd{} exposes a comp
 
 
 \section{Advanced Features}
-In this part I will try to explain some more advanced features that contribute in making the \djd{} more powerful, scalable, tunable, and probably jusifies the 70.000+ public downloads of the software each month.
+In this part I will try to explain some more advanced features that contribute in making the \djd{} more powerful, scalable, tunable, and probably jusifies the 70.000+ public downloads of the software each month. I will present these features in details because we'll see later that some of my assignments for the internship were to maintain, or improve those features, and acquiring a strong understanding of these notions have also been the first step of the internship.
 
 \subsection{Connection Pooling}
 As stated before, at cluster initialization, the driver establishes connection to the first IP address that has been specified, and this node becomes for the driver, the \emph{Control connection}. In addition to that, the driver will also establish a connection to all the other nodes in the cluster. This is made for multiple purposes. First, in case of a clear failure on a node, which doesn't respond in time (timeout), or returns an internal exception, so the driver still has a way to process the request for the client. Remember that \ca{}'s architecture is Master-less, which means every node is able to handle every request, the nodes are aware of the data repartition (Token routing) and replication. The second advantage of connecting to all nodes is load balancing. Indeed, to handle heavy loads needed for some applications, the driver is able to distribute the requests to all nodes equally, so that one node connected doesn't get overloaded (more information in the \emph{Policies} section).\\
@@ -324,7 +332,82 @@ As usual, the driver provides highly tested and pre-configured Retry policies. A
 \subsubsection{Reconnection policy}
 A reconnection policy is meant to be used in cases where a connection in a pool gets closed because of a particular error. The reconnection policy mainly helps define the time before the next reconnection attempt gets scheduled. Users can explicitly set this time, or \emph{ConstantReconnectionPolicy} can help define a constant time before reconnection, and \emph{ExponentialReconnectionPolicy} helps define a base delay which will grow exponentially, until a maximum delay is reached, then when the maximum is reached, it will stay constant.
 
-\section{Object Mapper}
+\subsection{Object Mapper}
+The \om{} is an additional module of the driver, distributed as a separate Maven artifact. This module provides a simple object mapping that avoids most of the boiler plate of converting CQL results to and from a Java object. It handles basic CRUD operations in Cassandra tables containing UDTs, collections and all native CQL types.\\
+The object mapper is configured through annotations. The \om{} can map all native \emph{CQL} types and also collections, user defined types. The following is an example of its usage : 
+
+\begin{lstlisting}[label=om-ex-1, caption=Object Mapper example, style=Java]
+`@UDT(keyspace = "ks", name = "address")`
+class Address {
+    private String street;
+    `@Field(name = "zip_code")`
+    private int zipCode;
+    // ... constructors / getters / setters
+}
+
+`@Table(keyspace = "ks", name = "companies",
+       readConsistency = "QUORUM",
+       writeConsistency = "QUORUM",
+       caseSensitiveKeyspace = false,
+       caseSensitiveTable = false)`
+public static class Company {
+    `@PartitionKey`
+    `@Column(name = "company_id")`
+    private UUID companyId;
+    private String name;
+    private Map<String, Address> aMap;
+
+    // ... constructors / getters / setters
+}
+...
+
+/* Application code */
+Mapper<Company> mapper = manager.mapper(Company.class);
+
+UUID companyId = ...;
+
+Map<String, Address> map = 
+                     new HashMap<String, Address>();
+map.put("office1", new Address("street1", 01000));
+
+Company c = 
+        new Company(companyId, "GreatestCompany", map);
+
+mapper.save(u); //The mapper persists the object
+\end{lstlisting}
+The mapper also provides accessors, and has its set of \emph{Option}s for tuning.
+
+\subsection{Query builder}
+The query builder is another module of the driver, that comes packaged with the driver core component. As its name states, the query builder helps creating valid \emph{CQL} queries in an object oriented fashion. It handles most of the possibilities offered in the \emph{CQL} syntax.\\
+Here's a quick example : 
+\begin{lstlisting}[label=qb-ex-1, caption=Query Builder example, style=Java]
+QueryBuilder builder = new QueryBuilder(cluster);
+Statement select = builder.select().all().from("foo").where(gt("k=1 OR k", 42)).limit(42);
+// Result is : "SELECT * FROM foo WHERE \"k=1 OR k\">42 LIMIT 42;"
+\end{lstlisting}
+
+
+
+\section{Notable new features}
+The previously presented features compose the core functionality of the driver. However, since the beginning of this internship, some other interesting features have been added, on some of them I've been helping and contributing.
+
+\subsection{Speculative retries}
+\emph{Speculative retries} is a way to improve a query execution in case a host happens to be long to respond, because of a GC pause for example. Where \sr{} acts, is that the driver will automatically, transparently for the user, send the statement to another host in case it responds faster.\\
+In case speculative retries are fired, the previously sent statements are canceled on the hosts.\\
+\begin{figure}[ht!]
+\centering
+\includegraphics[scale=0.7]{spec_rec.png}
+\caption{How speculative retries work \label{overflow}}
+\end{figure}
+With \sr{} comes the question to know when a statement is idempotent or not. Indeed, in \ca{} a statement is not idempotent when it : 
+\begin{itemize}
+   \item update a counter\footnote{A counter is a special column type in \ca{} that's optimized and tunable in consistency and cache options on the server side. A counter can only be incremented or decremented by reading the current value and applying a \emph{delta}. Thus, the nature of this type is non-idempotent.} ;
+   \item adds an element in a collection like a list ;
+   \item uses non idempotent \emph{CQL} functions like \emph{now()}.
+\end{itemize}
+Hence, since the driver does not parse text \emph{CQL} statements that it sends to the server, a conservative approach has been taken and all statements are considered as non-idempotent by default. Users have to explicitly indicate that the statement is idempotent through a statement \emph{option}. The only moment when the driver can know if a statement is idempotent, is when the query is constructed with the \emph{Query Builder}.\\
+\emph{Speculative retries} are configurable on the delay new retries are scheduled. This delay is compatible with another driver component, the \emph{Latency Tracker}.
+
 
 
 \chapter{Achieved work}
