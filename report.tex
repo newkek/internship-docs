@@ -298,7 +298,7 @@ With fine tuning of these parameters, our experiments prove that the driver have
 In more recent versions of \ca{}, the \emph{Native protocol} have been updated and is now able to support 32768 requests on each connection. This greatly helps improving the usage of a connection pool, unfortunately experiments still show a bottleneck in using a limited number of connections in pools, more on that later, in the \emph{Netty} section.
 
 \subsection{Policies}
-The Java driver is highly tunable, and some of its most important settings are defined with policies. A policy is a Java object defined by the user, implementing an \verb;Interface; of the driver, and whose methods will be injected used in the driver's code. The user can specify the policies during the cluster's creation.
+The Java driver is highly tunable, and some of its most important settings are defined with policies. A policy is a Java object defined by the user, implementing an \verb;Interface; of the driver, and whose methods will be injected in the driver's code. The user can specify the policies during the cluster's creation.
 
 \subsubsection{Load Balancing Policy}
 The driver provides a set of pre-configured and highly tested load balancing policies. However, a user can injects its own. The load balancing policy is the class defining the \verb;queryPlan;. The \verb;queryPlan; is the object which defines what will be the host chosen to send each query, it's a Java \verb;Iterator; which will return a host each time the driver needs to send a request. This setting is important in order to distribute the load on as much nodes as possible and thus, avoid bottlenecks and improve throughput.\\
@@ -333,7 +333,7 @@ As usual, the driver provides highly tested and pre-configured Retry policies. A
 A reconnection policy is meant to be used in cases where a connection in a pool gets closed because of a particular error. The reconnection policy mainly helps define the time before the next reconnection attempt gets scheduled. Users can explicitly set this time, or \verb;ConstantReconnectionPolicy; can help define a constant time before reconnection, and \verb;ExponentialReconnectionPolicy; helps define a base delay which will grow exponentially, until a maximum delay is reached, then when the maximum is reached, it will stay constant.
 
 \subsection{Object Mapper}
-The \om{} is an additional module of the driver, distributed as a separate Maven artifact. This module provides a simple object mapping that avoids most of the boiler plate of converting CQL results to and from a Java object. It handles basic CRUD operations in Cassandra tables containing UDTs, collections and all native CQL types.\\
+The \om{} is an additional module of the driver, distributed as a separate Maven artifact. This module provides a simple object mapping that avoids most of the boilerplate of converting CQL results to and from a Java object. It handles basic CRUD operations in Cassandra tables containing UDTs, collections and all native CQL types.\\
 The object mapper is configured through annotations. The \om{} can map all native \emph{CQL} types and also collections, user defined types. The following is an example of its usage : 
 
 \begin{lstlisting}[label=om-ex-1, caption=Object Mapper example, style=Java]
@@ -392,7 +392,7 @@ Statement select = builder.select().all().from("foo").where(gt("k=1 OR k", 42)).
 The previously presented features compose the core functionality of the driver. However, since the beginning of this internship, some other interesting features have been added, on some of them I've been helping and contributing.
 
 \subsection{Speculative retries}
-\emph{Speculative retries} is a way to improve a query execution in case a host happens to be long to respond, because of a GC pause for example. Where \sr{} acts, is that the driver will automatically, transparently for the user, send the statement to another host in case it responds faster.\\
+\emph{Speculative retries} is a way to improve a query execution in case a host happens to be long to respond, because of a GC pause, for example. Where \sr{} acts, is that the driver will automatically, transparently for the user, send the statement to another host in case it responds faster.\\
 In case speculative retries are fired, the previously sent statements are canceled on the hosts.\\
 \begin{figure}[ht!]
 \centering
@@ -416,7 +416,7 @@ Recent versions of the driver comes with a new \emph{Query Logger} module. It is
    \item take longer than a configured threshold ;
    \item return exceptions or fail.
 \end{itemize}
-The threshold mentioned above can be a constant value, declared at \verb;Cluster;'s initialization. Or on a more advanced usage, the threshold can be dynamic, and paired with the \verb;PerHostPercentileTracker;. That way, users can easily detect a sudden latency happening on the network, maybe due to congestion, router failures, etc.
+The threshold mentioned above can be a constant value, declared at \verb;Cluster;'s initialization. Or, for a more advanced usage, the threshold can be dynamic, and paired with the \verb;PerHostPercentileTracker;. That way, users can easily detect a sudden latency happening on the network, maybe due to congestion, router failures, etc.
 \begin{lstlisting}[label=ql-ex-1, caption=Query Logger live action, style=Java]
 TRACE [cluster1] [/127.0.0.1:9042] Query too slow, took 329 ms: SELECT * FROM users WHERE user_id=? [user_id=42];
 \end{lstlisting}
@@ -426,10 +426,52 @@ On the one hand, the \djd{} have been using \emph{Netty} since its first version
 
 \subsubsection{Brief description (at least I tried, to be brief)}
 Basically \emph{Netty} is a very well known and well renowned Java network I/O framework, designed to  tackle heavy loads, be scalable, and drastically be easier to use than Java OIO and Java NIO\footnote{Java Old I/O and Java New I/O, the former is the first developed blocking Input/Output Java API based on sockets streams, the latter being the non-blocking one introduced first in JDK 1.4, then upgraded and named NIO.2 starting from JDK 1.7, buffer-oriented.} libraries. It is used on some of the most scalable and powerful actual industry platforms\footnote{Facebook, Twitter, Instagram, Netflix, Spotify, Apple, the list is quite long... http://netty.io/wiki/adopters.html}, and is the subject of many presentations and a book, written by its creator.\\
+\subsubsection{Glossary and processing logic}
 The main point of using \emph{Netty} is abstracting the code to process I/O on network sockets asynchronously, by providing an event based networking applicative framework composed of channels, thread executors, and buffers. Everything being highly tunable\footnote{I actually read 2/3 of the 250 pages book, and it is quite hard to sum-up.}.\\
-I/O in \emph{Netty} is exposed to users through \verb;Channel;s. When data is arriving on a \verb;Channel; (sending a packet, or receiving a packet), a callback handler is triggered to process the information on or to the \verb;Channel;. Executing a callback is creating a \verb;EventLoop; object, which can be viewed as the same as a \verb;Runnable; Java task. \verb;EventLoop;s are created by an \verb;EventLoopGroup;. The \verb;EventLoopGroup; is an entity managing clusters of threads (equivalent as a Java \verb;Executor;), that binds an \verb;EventLoop; to a thread, enqueues \verb;EventLoop;s and execute them on available threads. Hence there is a 1-n relationship between Thread and \verb;EventLoop;.\\
-Last point, multiple handlers for the same \verb;Channel;s, can be \emph{chained} in a pipeline. When for example, a packet arrives on a \verb;Channel;, it will be processed by the handler configured \emph{first} in the pipeline. Then, if another handler is registered in the pipeline, it will be called with, as a parameter, the output of the first handler. Then, if a third handler is configured, it will be called with the output of the second handler, and so on. This pipeline is called \verb;ChannelPipeline;, users can chain handlers, called \verb;ChannelHandler;, in the pipeline easily, change the order, delete handlers, etc.
+In \emph{Netty}, when a connection on a socket is created, it is bound to a \verb;Channel;. When data is arriving on a \verb;Channel; (sending a packet, or receiving a packet), a callback handler is triggered to process the information from or to the \verb;Channel;. Triggering a callback is creating a \verb;event;, which can be viewed as the same as a \verb;Runnable; Java task. To each \verb;Channel; is assigned one \verb;EventLoop;, each \verb;EventLoop; can be managing one or more \verb;Channel;s, that will execute the handler method, the \verb;EventLoop; will execute the incoming events in an asynchronous manner.\\
+\verb;EventLoop;s are grouped in \verb;EventLoopGroup;s, the \verb;EventLoopGroup; is an entity managing the \verb;EventLoops; according to the current load of the host (i.e. it is an enhanced version of a Java \verb;Executor;).\\
+Last point, multiple handlers for the same \verb;Channel;s, can be \emph{chained} in a pipeline. When, for example, a packet arrives on a \verb;Channel;, it will be processed by the handler configured \emph{first} in the pipeline. Then, if another handler is registered in the pipeline, it will be called with, as a parameter, the output of the first handler. Then, if a third handler is configured, it will be called with the output of the second handler, and so on. This pipeline is called \verb;ChannelPipeline;, users can chain handlers, called \verb;ChannelHandler;, in the pipeline easily, change the order, delete handlers, etc.\\
+All of this architecture is made to provide the possibility to easily write asynchronous code relying on \emph{Netty} easily, and get rid of having to create manually and manage thread pools, selectors, sockets creation, and so one. \emph{Netty} also provides enhanced objects, improved compared to the Java API ones, like \verb;ByteBuffer;s (e.g \verb;ByteBuf;).
 
+\subsubsection{\emph{Bloody hell}, what changed in \emph{Netty 4}?}
+As stated earlier, \emph{Netty}'s upgrade to version \emph{4} marked a big change in the API, and in the internal structure. Indeed, with \emph{Netty 4} comes a restructured and clearly defined thread model.\\
+The direct goal of this new thread model, is defining how handler are executed, by which \verb;EventLoop;, by which \verb;EventLoopGroup;. \\
+Prior to \emph{Netty 4} there was no warranty that \verb;ChannelHandler;'s methods would not be called concurrently, whereas with \emph{Netty 4}, it is guaranteed that methods of a \verb;ChannelHandler; are called sequentially. This completely removes the need of synchronization inside \verb;ChannelHandler; methods. \emph{Netty 4} also offered the possibility to bind a \verb;ChannelHandler; to a particular \verb;EventLoop; (or \verb;EventExecutor;)\\
+With the new thread model, it is also possible to specify a \emph{EventLoop} or \emph{EventLoopGroup} for a particular handler.\\
+A lot of new customization options have been exposed in the \emph{Netty} API, and now the driver exposes a new class \verb;NettyOptions; that gives the possibility to : 
+\begin{itemize}
+   \item Specify the \verb;EventLoopGroup; that the driver will inject in \emph{Netty} to process all the I/O and decoding the protocol packets. So users wishing to use their own \emph{Netty} \verb;EventLoopGroup; for their application code, and have the same used in the Java Driver, can have full control on the resources used by it.
+   \item A hook is exposed, that will be called each time a \verb;Channel; is initialized, i.e each time a new \verb;Connection; is created to a host. This is mainly intended to allow to users the possibility to register their own additional handler to the \verb;ChannelPipeline;.
+\end{itemize}
+Thanks to the big improvements on the \emph{Netty 4} API, particularly handler and \verb;EventLoopGroup;s, we opened new tickets, for future work, to enable the driver to exclusively make use of Netty's \verb;EventLoopGroups; for all operations in the driver. And get rid of the additional \verb;Executors; we use internally.
+
+\subsection{Heartbeat}
+Connections may be dropped by intermediate network devices during long idle times. Then the \djd{} added a Heartbeat mechanism that sends very simple packets on the connection, on a configurable time basis.
+
+\subsection{Schema changes events}
+Basically one role of the \emph{Control connection} for the driver, is to send notifications to the driver, when a query processed by Cassandra adds a column, creates a table, creates indexes, etc. This is referenced in the driver as \emph{Schema change events}. Until now, these events were processed internally by the driver, completely transparent for users.\\
+Last versions of the driver have improved the way events are processed to improve overall performance in case the driver gets flooded with a lot of \emph{Schema change events}.\\
+To avoid being flooded by a lot of schema change event, the solutions implemented were : 
+\begin{itemize}
+   \item buffer the incoming events, and deliver them regularly based on a countdown ;
+   \item apply algorithms to coalesce same, or related \emph{schema change events}. This process would be executed when the countdown expires, before delivering the events. This can prevent from processing multiple events related that would cancel themselves, for example receiving a event \emph{dropped table x}, immediately after an event \emph{added column y in table x}, would avoid to the driver the cost of having to fetch the \emph{metadata} of \emph{column y}.
+\end{itemize}
+Latest version of the \djd{} also allows users to register a handler that will be called each time a \emph{Schema change event} is received. This has been a feature requested by several clients in production environments.
+
+\subsection{Monitoring with \emph{Metrics}}
+It is possible to monitor the \djd{} thanks to the \emph{Metrics} API. A lot of components in the driver are then registered through Metrics counters, gauges, histograms. Here are some of the metrics exposed by the driver : 
+\begin{itemize}
+   \item Current number of open connections
+   \item The number of requests performed on the cluster, the requests rate per seconds (also 1, 5, 15 minutes rates), min, max and average latencies for request.
+   \item Various counters of errors including : requests timeouts, retries on errors, ignored on errors, speculative executions.
+\end{itemize}
+This option is configurable and compatible with logging libraries like \emph{Log4j} or \emph{LogBack}. This is also compatible with reporting backends and visualization tools, like Ganglia or Graphite, which are also used by our test engineering teams during endurance testing cycles. \emph{Metrics} were used since older versions of the driver but a lot of the new presented earlier features have been set up to be monitored with \emph{Metrics}.
+
+\subsection{\ca{} 2.2+ parity}
+The \djd{} as for other \emph{DataStax} drivers follow closely the development of its referring database \ca{}. Hence when new features are added in a Cassandra release, this allows new possibilities on the driver side. Simple additions like new \emph{data types} on the server side are mostly pretty easy to take care of. However, some more powerful and important new features requires change in the driver so they can be fully exploited by clients.
+
+\subsubsection{Key/value payload and custom query handler}
+Users of \ca{} version 2.2 can, at node's startup, decide to register a \emph{Custom query handler}, that will replace
 
 
 
