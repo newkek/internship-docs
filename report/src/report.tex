@@ -29,6 +29,9 @@
 \usepackage{setspace}
 \usepackage{graphicx}
 
+\usepackage{afterpage}
+
+
 \usepackage{abstract}
 \renewcommand{\abstractnamefont}{\normalfont\bfseries}
 \renewcommand{\abstracttextfont}{\normalfont\small\itshape}
@@ -43,7 +46,13 @@
 % \titleformat{\section}[block]{\Large\vspace{0.5cm}}{}{1em}{}
 % \titleformat{\subsection}[block]{\large\vspace{0.3cm}}{}{1em}{}
 
-\setcounter{tocdepth}{2}
+\setcounter{tocdepth}{1}
+
+\newcommand\blankpage{%
+    \null
+    \thispagestyle{empty}%
+    \addtocounter{page}{-1}%
+    \newpage}
 
 \newcommand{\ds}{\emph{DataStax\xspace}}
 \newcommand{\djd}{\emph{DataStax Java Driver\xspace}}
@@ -188,10 +197,12 @@ Company : Shannon \textsc{Dennis} % Supervisor's Name
 \vfill % Fill the rest of the page with whitespace
 
 \end{titlepage}
+\addtocounter{page}{-1}
+
+\afterpage{\blankpage}
 
 \tableofcontents
-\thispagestyle{empty}
-
+\afterpage{\blankpage}
 
 %%%%%%%%%%%%%%%%%%%%CONTENT%%%%%%%%%%%%%%%
 
@@ -403,7 +414,7 @@ QueryBuilder builder = new QueryBuilder(cluster);
 Statement select = builder.select().all().from("foo").where(gt("k=1 OR k", 42)).limit(42);
 // Result is : "SELECT * FROM foo WHERE \"k=1 OR k\">42 LIMIT 42;"
 \end{lstlisting}
-
+\newpage
 
 
 \section{Notable new features}
@@ -485,6 +496,12 @@ It is possible to monitor the \djd{} thanks to the \emph{Metrics} API. A lot of 
 \end{itemize}
 This option is configurable and compatible with logging libraries like \emph{Log4j} or \emph{LogBack}. This is also compatible with reporting backends and visualization tools, like \emph{Ganglia} or \emph{Graphite}, which are also used by our test engineering teams during endurance testing cycles. \emph{Metrics} were used since older versions of the driver but a lot of the new presented earlier features have been set up to be monitored with \emph{Metrics}.
 
+
+\subsection{Asynchronous host pools creation} % (fold)
+\label{sub:asynchronous_host_pools_creation}
+Until now, creating a pool of connection to a \ca{} node was all made sequentially. Moreover, making an authenticated connection on a \ca{} cluster implies a certain overhead due to password verification. Therefore, when the driver has to make sequentially a pool of authenticated connections it could imply too much latency on a cluster with a large number of nodes.\\
+The solution was to make the pool creation entirely asynchronous. Thus, all connection pools are made in parallel, and the driver worker only have to wait for all connections to be established. Since we are in a HIGHLY concurrent part of code, lots of issues were produced when adding this feature and needed a big part of refactoring of code. Performance tests report a time to connect to a 40 nodes cluster 8x faster.
+
 \subsection{\ca{} 2.2+ parity}
 The \djd{} as for other \emph{DataStax} drivers follow closely the development of its referring database \ca{}. Hence when new features are added in a Cassandra release, this allows new possibilities on the driver side. Simple additions like new \emph{data types} on the server side are mostly pretty easy to take care of. However, some more powerful and important new features requires change in the driver so they can be fully exploited by clients.
 
@@ -495,7 +512,7 @@ From the driver perspective, it is possible to set a payload on each statement b
 \subsubsection{User defined functions}
 \ca{} version \emph{3.0} allows the creation of functions, these functions will be done to process data on the server side, and can be called within \emph{CQL} statements. Example : 
 
-\begin{lstlisting}[label=udf-ex-1, caption=User defined function, style=CQL]
+\begin{lstlisting}[label=udf-ex-1, caption=User defined function in CQL, style=CQL]
 CREATE FUNCTION my_sin ( input double )
     RETURNS double LANGUAGE java
     BODY
@@ -518,27 +535,41 @@ Cassandra data types are converted by the driver in language specific types. As 
 With \emph{custom} codecs, the driver have been greatly restructured in order to allow setting codecs dynamically, at runtime. That way, a user can inject its \emph{Codecs} into the driver, thanks to a \verb;CodecRegistry;, and indicate how particular Cassandra types should be serialized and deserialized.\\
 One particular advantage of using custom codecs is if users want to use external libraries to automatically decode more complexes types like a \emph{Date} or a \emph{Timestamp}. In Java, it exists many libraries to deal with time information\footnote{libraries like \emph{Joda Time}, the new date and time API in Java 8, etc.}.\\ 
 For instance, a user who configured the driver to use Joda time for Date columns in Cassandra thanks to \emph{Custom codecs}, can directly iterate through a \verb;ResultSet;, call a \verb;row.getDate("columnName");, and what they will get will be a consistently filled \emph{Joda time} object. Practical applications to \emph{custom codecs} have no limit in the sense that it is completely dynamic.\\
-When adding this feature, we also focused on the performance impact that having dynamic methods call when encoding and decoding columns, instead of manually defined static methods, could have, and ran several performance tests on this feature. Results of performance tests showed an increase of the time taken by the driver to retrieve a codec dynamically for a certain column type, of \~{}130 nanoseconds for each call to \verb;set....(); or \verb;get....();. Which means it would take 10,000 get/set operations to generate an extra 1ms of extra time, 10 million to generate 1 second of additional time, and we considered this impact reasonable comparing to the benefits the feature brings.
+When adding this feature, we also focused on the performance impact that having dynamic methods call when encoding and decoding columns, instead of manually defined static methods, could have, and ran several performance tests on this feature. Results of performance tests showed an increase of the time taken by the driver to retrieve a codec dynamically for a certain column type, of \textasciitilde{}130 nanoseconds for each call to \verb;set....(); or \verb;get....();. Which means it would take 10,000 get/set operations to generate an extra 1ms of extra time, 10 million to generate 1 second of additional time, and we considered this impact reasonable comparing to the benefits the feature brings.
 
 
-\chapter{Achieved work}
-The main purpose of this internship at DataStax is to contribute to the active development of the open-source \djd{} for \ca{}. This includes aggregating the client's API with new functionalities to fit \ca{} functionalities, internal operation of the driver, improving Query Builder\footnote{Query Builder is a library developed for the Java Driver allowing clients to build query in an Object Oriented way. \textit{Example : Statement statement = QueryBuilder.select().all().from(keyspace, table);}} 
-and Object Mapper \footnote{Object Mapper is an Object Relational Mapping tool developed for the Java Driver.} 
-functions, resolving reported internal driver's issues and suggestions. I will then, give a brief description of some of the most significant tasks I have been working on since now. I have also been assigned to build a new \ds{}'s tool called \emph{Cassandra Detection Tool} (described later).
+\newpage
+\section{Issues assigned}
 
-\section{Java-Driver}
+The following are the most notable issues and features of the Java driver I have been assigned to, meaning that I have been developing alone the solutions, with helpful guidance and reviews from the other developers of the team.
+
 \subsection{Refactoring Integration Tests Class}
-The test architecture for the \djd{} is composed of both unit and integration test. Those test are ran 24/7 for continuous integration by \emph{Jenkins} servers. To simplify building these tests, a big number of integration tests are classes that extend an \emph{all-configured} class which has the responsibility to create the necessary connections and configurations with a test cluster using DataStax's specific tools for automating \ca{} cluster creation.\\
-The previous behavior was that inheriting this all-configured implied the need to recreate a new cluster each time. The process was simplified by creating a generic class that initiates a cluster and stays instanciated for all classes inheriting it, adding a thread-safe need for this class. Integration tests suite runs approximately 30\% faster.
+The test architecture for the \djd{} is composed of both unit and integration test. Those test are ran  for continuous integration by \emph{Jenkins} servers. To simplify building these tests, a big number of integration tests are classes that extend an \emph{all-configured} class which has the responsibility to create the necessary connections and configurations with a test cluster using DataStax's specific tools for automating \ca{} cluster creation.\\
+The previous behavior was that inheriting this all-configured implied the need to recreate a new local test cluster each time. The process was simplified by creating a generic class that initiates a cluster and stays instanciated for all classes inheriting it, adding a thread-safe need for this class. Integration tests suite runs approximately 30\% faster.
+
 \subsection{Manual Paging}
-Requests on \ca{} that generate a large amount of data are transfered in network applicative frames called \emph{pages}. These pages are identified by \ca{} and are communicated through the \emph{Native protocol}. The goal of this improvement was to give client the possibility to handle themselves the \emph{paging state} of a request. Thanks to his \emph{paging state} the client start fetching some data from the server, stop processing, and re-send a new request but with the \emph{paging state} information which allows him to continue its processing from where he had stopped. Giving the possibility to the driver to be used in a entirely stateless environment. This task involved studying \emph{Native protocol} and gathering information by manually decoding frames, changing the internal use of the \emph{paging state} in the driver and understanding \ca{}'s usage of the \emph{paging state}.
-\subsection{Asynchronous host pools creation} % (fold)
-\label{sub:asynchronous_host_pools_creation}
+Requests on \ca{} that generate a large amount of data are transfered in network applicative frames called \emph{pages}. These paged results are identified by \ca{} by a sort of index named \emph{Paging state} and are communicated through the \emph{Native protocol}. The driver already did handle results spanned on multiple pages, but the goal of this improvement was to give client the possibility to handle themselves the \emph{paging state} of a request. Thanks to a \emph{paging state} the client can start fetching some data from the server, stop processing, and re-send a new request but with the \emph{paging state} information which allows him to continue its processing from where he had stopped when saving the \emph{paging state}. Giving the possibility to the driver to be used in an entirely stateless environment. This task involved studying \emph{Native protocol} and gathering information by manually decoding frames, changing the internal use of the \emph{paging state} in the driver and understanding \ca{}'s mechanics in creating and generating the \emph{paging state}.\\
+Special attention were taken in the usage of a \emph{paging state} by a client, indeed it is specifically indicated in the \emph{Native protocol} that if a request contains an undefined or modified \emph{paging state}, the result is clearly undefined, they also specified that it can have a really bad effect on the Cassandra host itself (potentially making it crash). That is why in the driver we added a verification step when exposing the \emph{paging state}, in the sense that the paging state exposed is contained either in a String or in a \verb;ByteBuffer;, but we also added a hash in the content exposed, containing the query corresponding to the paging state, and some of the statement's metadata. That way, to try to prevent malicious or unsafe users from using a invalid paging state, the driver processes a verification of the hash contained in the paging state, and if the hash appears to be invalid, an error is thrown.
 
-Until now, creating a pool of connection to a \ca{} node was all made sequentially. Moreover, making an authenticated connection on a \ca{} cluster implies a certain overhead due to password verification. Therefore, when the driver has to make sequentially a pool of authenticated connections it could imply too much latency on a cluster with a large number of nodes.\\
-The solution was to make the pool creation entirely asynchronous. Thus, all connection pools are made in parallel, and the driver worker only have to wait for all connections to be established. Since we are in a HIGHLY concurrent part of code, lots of issues were produced when adding this feature and needed a big part of refactoring of code. Temporary tests report a improvement 8x the time for the driver to connect to a 40 nodes cluster.
+\subsection{Object Mapper improvements}
+Several tasks and improvements I've been assigned to concern the Object Mapper. I've been involved in rewriting a consequent part of its internal mechanics, and provide some advanced options and new features.\\
+As defined earlier (in section \emph{Object Mapper}) the main use of the \emph{Object Mapper} is to automatically map rows from a Cassandra table into POJOs, so that users doesn't have to be aware of the underlying schemas and keyspace, and doesn't have to deal with \emph{CQL}'s syntax. \\
+Internally, when a user requests an object to be filled from the mapper, the mapper generates a \emph{CQL} query, executes it, fetches results and invokes reflected methods defined in the mapped object. Basically this request generated was a \verb;SELECT * FROM table;.\\ 
+Before adding new features on top of that, for performance and modularity's sake, I decided to re-write that part of code generating the queries for Cassandra. The decision taken have been to inspect mapped classes before generating the statement, in order to define the columns that needed to be mapped, and produce a consistent statement according to it. So basically, if a table in Cassandra has a very large number of columns (and in some cases, it can be a ridiculously big number, thinking about denormalization), but users only need to map some of them, performance would be pretty much affected, on the driver and the server side.\\ 
+In addition to that, we added the concept of aliases in the mapper since it was recently available in Cassandra, and used aliases on columns in order normalize requests and results, similar concepts are used in JPA.\\ 
+Thanks to this internal change, we have been able to provide fine grained statements for mapped object, but moreover, this opened the possibility to map columns generated in a \emph{SELECT} statement, that are not specifically columns in a Cassandra table, referring for example to function calls.\\
+Now with the annotation \verb;@Computed;, users are able to map into an attribute the value of a function call on the Cassandra side. 
+\begin{lstlisting}[label=om-ex-2, caption=@Computed on mapped fields, style=Java]
+`@Computed("ttl(name)")`
+Integer ttl;
+\end{lstlisting}
+A return type check for each function is made, and errors are thrown if a user tries to map an attribute to the result of a function that does not have the same type.\\
+Another rather useful improvement was to expose a new class \emph{Option} in the mapper. Multiple options were to be added in the mapper to queries generated automatically, like \emph{Consistency levels}, \emph{Timestamps}, \emph{Time-to-live}. The existing options and the new ones have been regrouped in this new \verb;Option; class. The goal was to provide a unified API for users to add options to the mapper, and make it easy to add new ones in the future.\\
+An interesting option added, is the option for users to define whether to save mapped fields, if the value of the mapped object is \verb;null;. The goal is to define whether the field will be included in the generated query or not. This does not seem consequent, but can have a rather important impact on performance on the Cassandra side. Indeed, the aspect to look at is tombstones. When a row is to be inserted into a table\footnote{The object mapper is designed to only support the insertion of a Row in a table, indeed, updating a Row requires more complex processing, and the use of Proxies, which are considered to be to complex for the simple purpose of our Object Mapper.}, if a row with the same partition keys already exists, the row will be replaced. Now, if a field in the object that is to be persisted by the mapper, is null, and included in the query, the previous value in the column will be replaced by the value \emph{null}. In that case, a tombstone with the previous value for the column will be created\footnote{As a reminder, tombstones are objects containing values not used anymore by Cassandra, and are harvested during Cassandra's compaction phase. In big production environments, creating often a lot of tombstones can impact on the time of the compaction and worsen global performance.}. Whereas not including a null field in the query, will have for effect to keep the previous value present in the row. I believe it is this kind of minimal decisions that are interesting to take into account when designing fast and performant systems.
 
-\section{Cassandra Detection Tool}
+
+
+\chapter{Cassandra Detection Tool}
 \emph{Cassandra Detection Tool} is a software I have been asked to contribute to that's main function is to provide to customers all useful \ca{} information we can gather concerning a given a range of IPs. Customers owning a (\emph{very}) large number of clusters among its network sometimes isn't even sure how much nodes are running. \emph{Cassandra Detection Tool} makes then, a clean and concise description of the \ca{} instances. 
 A first prototype of the tool has been made by \emph{Martin Van Ryswyk}, our Executive Vice President in Engineering, and my work have been to build a final working solution of the software.\\
 It turned out that I changed almost all the code conserving the original conception design. Technically the process was to first, use asynchronous Java sockets to try to establish connection on all of the given IP, all tries made in parallel. Thanks to that the software could establish a list of UP nodes running a \ca{} instance. Moreover, the app use the \djd{} and  the \emph{Java Thrift API}\footnote{Apache Thrift is a network applicative protocol originally used for Cassandra but got replaced by the Native protocol because of performance issues and also because the Java API for Thrift was really hard to use and not well designed. It is still available (but not updated) and Deprecated but I use it here for compatibility with clusters potentially using an old version of Cassandra.}
