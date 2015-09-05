@@ -59,6 +59,10 @@
             <br>
         </section>
 
+        <section data-transition="fade">
+            <img src="img/turtle-johnathan.jpg">
+        </section>
+
         <section>
             <h2 class="slide-title-b">Agenda</h2>
             <section>
@@ -104,11 +108,11 @@
             <h2 class="slide-title-b">Apache Cassandra</h2>
             <section>
                 <ul>
-                    <li><p class="fragment">Distributed No-SQL database</p> </li>
-                    <li><p class="fragment">Peer-to-peer architecture</p> </li>
-                    <li><p class="fragment">Instant recovery</p> </li>
-                    <li><p class="fragment">Data replication<span class="fragment">, evenly distributed</span></p> </li>
-                    <li><p class="fragment">Multi Data centers supoprt<span class="fragment">, can always scale</span></p> </li>
+                    <li><p class="fragment">Distributed No-SQL database</p></li>
+                    <li><p class="fragment">Peer-to-peer architecture</p></li>
+                    <li><p class="fragment">Instant recovery</p></li>
+                    <li><p class="fragment">Data replication<span class="fragment">, evenly distributed</span></p></li>
+                    <li><p class="fragment">Multi Data centers supoprt<span class="fragment">, can always scale</span></p></li>
                     <li><p class="fragment">DataStax Enterprise is the fully supported, customized and production-ready distribution of Apache Cassandra.</p></li>
                 </ul>
             </section>
@@ -146,7 +150,8 @@
                 <p class="fragment">Meh, ok.</p>
             </section>
             <section>
-                <p>Let's do it efficiently, using multi-threading, <span class="fragment">nmap tool</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so that a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span></p>
+                <p>Let's do it efficiently, using nmap<span class="fragment">, multi-threading</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span>
+                </p>
 
                 <p class="fragment">Meh, ok.</p>
 
@@ -171,7 +176,9 @@
         <section>
             <h2 class="slide-title-b">DSE Graph &amp; Java Driver</h2>
             <section>
-                <p><blockquote class="nobordernobackground">The Graphter is coming.</blockquote></p>
+                <p>
+                <blockquote class="nobordernobackground">The Graphter is coming.</blockquote>
+                </p>
                 <p class="fragment">The DataStax Java Driver has to adapt to survive.</p>
             </section>
             <section>
@@ -183,7 +190,26 @@
                 </ul>
             </section>
             <section>
-                Work in progress.
+                <ul>
+                    <li class="fragment">Java Driver will be the first to make such integration.</li>
+                    <li class="fragment">Design document.</li>
+                    <li class="fragment">Built a first working prototype</li>
+                </ul>
+            </section>
+            <section>
+                <p>Overview of the API :</p>
+                <pre><code id="dseg-code">
+Cluster cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+GraphSession session = new GraphSession(cluster.connect());
+
+GraphStatement gs = new GraphStatement("g.V()");
+GraphResultSet grs = session.execute(gs);
+
+for (GraphTraversalResult gtr : grs) {
+    System.out.println("gtr.get() = " + gtr.get("result").get("properties").get("name").get(0).get("value"));
+}
+
+                </code></pre>
             </section>
 
         </section>
@@ -227,6 +253,10 @@
                     { src: 'plugin/multiplex/client.js', async: true },
 				]
 			});
+
+
+
+
 
 
 
