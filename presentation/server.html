@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Dev Tools &amp; Drivers</title>
+
+    <meta name="description" content="A presentation for Intern Showcase 2015 at DataStax">
+    <meta name="author" content="Jiangcheng Oliver Chu">
+    <meta name="author" content="Kevin Gallardo">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/datastax-ppt.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/ds-styles.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- JavaScript libraries -->
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+
+    <!-- JavaScript functionalities -->
+    <script type="text/javascript" src="js/ds-showcase.js"></script>
+
+    <!-- Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+<!-- When this page loads, run the main function: -->
+<body onload="ds_showcase.main();">
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section id="splashpage">
+            <img data-src="img/datastax-official-logo.png" id="main-logo"><br>
+
+            <h3 class="title-primary">Dev Tools &amp; Drivers</h3>
+
+            <p id="authors" class="subtitle-primary">
+                Created by
+                <a class="person-name"
+                   href="https://github.com/newkek"
+                   target="_blank"
+                   title="View Github profile">Kévin Gallardo</a>
+                &amp;
+                <a class="person-name"
+                   href="https://github.com/Carrotlord"
+                   target="_blank"
+                   title="View Github profile">Oliver Chu</a>
+            </p>
+            <br>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b"></h2>
+            <section>
+                <table id="toc">
+                    <tr>
+                        <td class="toc-td">
+                            1
+                        </td>
+                        <td>
+                            Job-Creator
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            2
+                        </td>
+                        <td>
+                            The build.yaml &amp; Domain Specific Language
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            3
+                        </td>
+                        <td>
+                            Broker System
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            4
+                        </td>
+                        <td>
+                            Java Driver
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            5
+                        </td>
+                        <td>
+                            Cassandra Detection Tool
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            6
+                        </td>
+                        <td>
+                            DSE Graph
+                        </td>
+                    </tr>
+
+                </table>
+            </section>
+        </section>
+
+        <section id="live">
+            <h2 class="slide-title-b">Live</h2>
+            <section>
+                You can watch the slides moving live here : <br/><a href="http://tinyurl.com/ds-showcase">tinyurl.com/ds-showcase</a>
+            </section>
+        </section>
+
+        <section id="part1">
+            <h2 class="slide-title-b">Part 1: Jenkins Job-Creator</h2>
+            <section id="oc-desc">
+                <h4 class="fragment">Oliver Chu</h4>
+                <ul>
+                    <li><p class="fragment">12-week internship (totally normal)</p></li>
+                    <li><p class="fragment">Dev Tools TEAM</p></li>
+                    <li><p class="fragment">Used to live in NY, now living in Berkeley, working at Santa Clara</p></li>
+                    <li><p class="fragment">Hackathons &amp; designathons are amazing</p></li>
+                </ul>
+            </section>
+        </section>
+
+        <section>
+            <h2 id="jenkins" class="slide-title-b">What is Jenkins?</h2>
+            <section>
+                <img data-src="img/jenkins.png" style="height: 220px;">
+                <br>
+                &ldquo;A continuous integration test server&rdquo;
+                <br><br>
+                What it <em>really</em> means:<br>Lets you test the code across many scenarios and platforms at the same time, to make sure the product doesn't break when it reaches the client.
+            </section>
+        </section>
+
+        <section>
+          <h2 class="slide-title-b">Highly Scientific Diagram</h2>
+            <section>
+                <img id="job-creator-diagram" data-src="img/job-creator-diagram.png">
+            </section>
+        </section>
+
+        <!--
+            Versions to 'insert' during the presentation:
+
+            node.js: 0.12.7
+            C*     : 2.2.0
+        -->
+        <section>
+          <h2 id="build-yaml" class="slide-title-b">Job-Creator's build.yaml</h2>
+            <section>
+          <pre><code data-trim contenteditable id="build-yaml-code">nodejs:
+  - 0.10.38
+  - iojs-2.0.2
+os:
+  - ubuntu/trusty64
+  - windows/server7
+env:
+  CASSANDRA_VERSION:
+    - 1.2.19
+    - 2.0.12
+build:
+  - type: bash
+    only:
+      os: /^(ubuntu|centos)/
+  - type: powershell
+    exec: VS_BUILD.ps1
+    only:
+      os: /^win/
+  - type: mocha
+  - type: cucumber</code></pre>
+            <ul id="build-yaml-advantages">
+                <li>Much faster than configuring Jenkins by hand</li>
+                <li>Easily customize versions for language, OS, and software<br>(such as Cassandra version)</li>
+                <li>It's convenient: generates a Jenkins Job when you push to Github</li>
+            </ul>
+            </section>
+        </section>
+
+        <section>
+          <h2 id="job-creator-dsl" class="slide-title-b">The Domain Specific Language</h2>
+            <section>
+          <table><tr><td>
+          <pre><code data-trim contenteditable id="dsl-code">runtime('runtime') do
+  versions('v1', 'v2', 'v3', 'vSpecial')
+
+  configure do |cfg|
+    os(/ubuntu\/.*/) do
+      shell(script: &lt;&lt;-BASH)
+sudo apt-get install -y runtime-manager
+      BASH
+
+      version('v1') do
+        shell(script: &lt;&lt;-BASH)
+runtime-manager set-version v1
+        BASH
+      end
+
+      version('v2') do
+        shell(script: &lt;&lt;-BASH)
+runtime-manager set-version v2
+        BASH
+      end
+
+      version('v3') do
+        shell(script: &lt;&lt;-BASH)
+runtime-manager set-version v3
+        BASH
+      end
+
+      version('vSpecial') do
+        shell(script: &lt;&lt;-BASH)
+runtime-manager set-version vSpecial
+        BASH
+      end
+    end
+  end
+end</code></pre>
+      </td><td>
+        <div style="height: 15px;">&nbsp;</div>
+        <table id="code-repr" class="">
+          <tr>
+            <td class="inverted_aligned">Runtime name</td>
+            <td class="aligned">"runtime"</td>
+          </tr>
+          <tr>
+            <td class="inverted_aligned">Match OS</td>
+            <td class="aligned">OS name starts with "ubuntu/"</td>
+          </tr>
+          <tr>
+            <td class="inverted_aligned">Versions</td>
+            <td class="aligned">v1, v2, v3, vSpecial</td>
+          </tr>
+          <tr>
+            <td class="inverted_aligned">Install step</td>
+            <td class="aligned">sudo apt-get install -y runtime-manager</td>
+          </tr>
+          <tr>
+            <td class="inverted_aligned">Set version (for all versions)</td>
+            <td class="aligned">runtime-manager set-version <span style="color: green;">(your-version)</span></td>
+          </tr>
+        </table>
+      </td></tr>
+    </table>
+
+            <ul id="dsl-advantages">
+                <li>Have full control over which Bash and Powershell scripts to use</li>
+                <li>Use Ruby to conditionally switch on other parts of build.yaml</li>
+                <li>Iterate over data collections to apply many build-steps</li>
+            </ul>
+            </section>
+        </section>
+
+        <section>
+          <h2 class="slide-title-b">How it works</h2>
+            <section>
+                <img id="job-creator-internals" data-src="img/job-creator-internals.png">
+            </section>
+        </section>
+
+        <section id="part2">
+            <h2 class="slide-title-b">Part 2: Java Driver, CDT &amp; DSE Graph
+            </h2>
+            <section>
+                <h4 class="fragment">Kévin Gallardo</h4>
+                <ul>
+                    <li><p class="fragment">6 months internship (a bit unusual)</p></li>
+                    <li><p class="fragment">Java Driver TEAM</p></li>
+                    <li><p class="fragment">French guy, with Italian origins, living in the U.K., working for an American company</p></li>
+                    <li><p class="fragment">Diversity FTW</p></li>
+                </ul>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">Java Driver</h2>
+            <section>
+                <p>Goal : contribute to the awesomeness of the driver</p>
+                <ul>
+                    <li><p class="fragment">Involved in the last 2.x versions : 2.0.10 ; 2.0.11 ; 2.1.7 ; 2.2</p></li>
+                    <li><p class="fragment">New Retry Policies,<span class="fragment"> lots of improvements for the Object Mapper,</span><span class="fragment"> expose Paging State API,</span><span
+                            class="fragment"> Query Builder improvements,</span><span class="fragment"> parity with C* 2.2 new features.</span></p></li>
+                    <li><p class="fragment">A bunch of bug fixes, a bit of test engineering.</p></li>
+                    <li><p class="fragment">And so on...</p></li>
+                </ul>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">Cassandra Detection Tool</h2>
+            <section>
+                <blockquote class="nobordernobackground">Why not provide a tool that makes a scan of a company's sub-network to detect all Cassandra/DSE clusters instances?</blockquote>
+                <p class="fragment">Meh, ok.</p>
+            </section>
+            <section>
+                <p>Let's do it efficiently, using multi-threading, <span class="fragment">nmap tool</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so that a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span></p>
+
+                <p class="fragment">Meh, ok.</p>
+
+                <p class="fragment">And add a Graphic User Interface so it looks flawless and user friendly to Sales Teams.</p>
+            </section>
+            <section>
+                <p>You mean, like that?</p>
+                <img class="nobordernobackground" width="680" height="400" data-src="img/cdt-preview.png" alt="CDT preview">
+            </section>
+            <section>
+                <p>And don't forget to make it compatible with Linux, Windows, and Mac OS.</p>
+
+                <p class="fragment"><img class="nobordernobackground" width="120" height="200" data-src="img/minion.png" alt="OK"/></p>
+
+                <p class="fragment"><a href="https://github.com/riptano/cdt" target="_blank">Available here.</a>
+                    <br/>
+                    Collaborated with Martin Van Ryswyk.
+                </p>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">DSE Graph &amp; Java Driver</h2>
+            <section>
+                <p><blockquote class="nobordernobackground">The Graphter is coming.</blockquote></p>
+                <p class="fragment">The DataStax Java Driver has to adapt to survive.</p>
+            </section>
+            <section>
+                <ul>
+                    <li>Graph data model is much more dynamic.</li>
+                    <li class="fragment">A subprotocol will be used within the Native protocol.</li>
+                    <li class="fragment">The drivers have to be able to decode that.</li>
+                    <li class="fragment">Provide a meaningful API to match these new possiblities.</li>
+                </ul>
+            </section>
+            <section>
+                Work in progress.
+            </section>
+
+        </section>
+        <span id="copyright-text-left">&copy; 2015 DataStax, All Rights Reserved</span>
+        <span id="copyright-text-center">Company Confidential</span>
+        <span id="jenkins-analytics"></span>
+        <span id="page-number"></span>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+                multiplex: {
+                    id: 'fb074ce72a2a370b',
+                    secret: '14380888603871967753',
+                    url: 'kgdo.me:1948'
+                },
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+                    { src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.17/socket.io.min.js', async: true },
+                    { src: 'plugin/multiplex/master.js', async: true },
+				]
+			});
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

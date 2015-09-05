@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+
+    <title>Drivers and Tools at DataStax</title>
+
+    <meta name="description" content="A presentation for Master SAR internships presentations">
+    <meta name="author" content="Kevin Gallardo">
+
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+    <link rel="stylesheet" href="css/reveal.css">
+    <link rel="stylesheet" href="css/theme/datastax-ppt.css" id="theme">
+
+    <!-- Code syntax highlighting -->
+    <link rel="stylesheet" href="lib/css/zenburn.css">
+
+    <!-- Custom styles -->
+    <link rel="stylesheet" href="css/ds-styles.css">
+
+    <!--[if lt IE 9]>
+    <script src="lib/js/html5shiv.js"></script>
+    <![endif]-->
+
+    <!-- JavaScript libraries -->
+    <script type="text/javascript" src="js/jquery-1.11.3.min.js"></script>
+
+    <script type="text/javascript" src="js/ds-showcase.js"></script>
+
+
+    <!-- Fonts -->
+    <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
+</head>
+
+<!-- When this page loads, run the main function: -->
+<body onload="ds_showcase.main()">
+
+<div class="reveal">
+
+    <!-- Any section element inside of this container is displayed as a slide -->
+    <div class="slides">
+        <section id="splashpage">
+            <img data-src="img/datastax-official-logo.png" id="main-logo"><br>
+
+            <h3 class="title-primary">Drivers and Tools at DataStax</h3>
+
+            <p id="authors" class="subtitle-primary">
+                Created by
+                <a class="person-name"
+                   href="http://kgdo.me"
+                   target="_blank"
+                   title="View Github profile">Kévin Gallardo</a>
+            </p>
+            <br>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">Agenda</h2>
+            <section>
+                <table id="toc">
+                    <tr>
+                        <td class="toc-td">
+                            1
+                        </td>
+                        <td>
+                            Apache Cassandra
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            2
+                        </td>
+                        <td>
+                            DataStax Java Driver for Apache Cassandra
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            3
+                        </td>
+                        <td>
+                            Cassandra Detection Tool
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="toc-td">
+                            4
+                        </td>
+                        <td>
+                            DSE Graph and Java Driver integration
+                        </td>
+                    </tr>
+                </table>
+            </section>
+        </section>
+
+
+        <section id="cass">
+            <h2 class="slide-title-b">Apache Cassandra</h2>
+            <section>
+                <ul>
+                    <li><p class="fragment">Distributed No-SQL database</p> </li>
+                    <li><p class="fragment">Peer-to-peer architecture</p> </li>
+                    <li><p class="fragment">Instant recovery</p> </li>
+                    <li><p class="fragment">Data replication<span class="fragment">, evenly distributed</span></p> </li>
+                    <li><p class="fragment">Multi Data centers supoprt<span class="fragment">, can always scale</span></p> </li>
+                    <li><p class="fragment">DataStax Enterprise is the fully supported, customized and production-ready distribution of Apache Cassandra.</p></li>
+                </ul>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">Java Driver</h2>
+            <section>
+                <p>Goal : Establish connection to a cluster and send statements.</p>
+                <ul>
+                    <li class="fragment">Native protocol && CQL</li>
+                    <li class="fragment">Connection pools</li>
+                    <li class="fragment">Netty</li>
+                    <li class="fragment">Policies<span class="fragment"> (Load Balancing</span><span class="fragment">, Retry</span><span class="fragment">, Reconnection)</span></li>
+                    <li class="fragment">Many other useful tuning options, Object Mapper and Query Builder.</li>
+                </ul>
+            </section>
+
+            <section>
+                <p>First topic of the internship : contribute to the awesomeness of the driver</p>
+                <ul>
+                    <li><p class="fragment">Involved in the last 2.x versions : 2.0.10 ; 2.0.11 ; 2.1.7 ; 2.2</p></li>
+                    <li><p class="fragment">New Retry Policies,<span class="fragment"> lots of improvements for the Object Mapper,</span><span class="fragment"> expose Paging State API,</span><span
+                            class="fragment"> Query Builder improvements,</span><span class="fragment"> parity with C* 2.2 new features.</span></p></li>
+                    <li><p class="fragment">A bunch of bug fixes, a bit of test engineering.</p></li>
+                    <li><p class="fragment">And so on...</p></li>
+                </ul>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">Cassandra Detection Tool</h2>
+            <section>
+                <blockquote class="nobordernobackground">Why not provide a tool that makes a scan of a company's sub-network to detect all Cassandra/DSE clusters instances?</blockquote>
+                <p class="fragment">Meh, ok.</p>
+            </section>
+            <section>
+                <p>Let's do it efficiently, using multi-threading, <span class="fragment">nmap tool</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so that a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span></p>
+
+                <p class="fragment">Meh, ok.</p>
+
+                <p class="fragment">And add a Graphic User Interface so it looks flawless and user friendly to Sales Teams.</p>
+            </section>
+            <section>
+                <p>You mean, like that?</p>
+                <img class="nobordernobackground" width="680" height="400" data-src="img/cdt-preview.png" alt="CDT preview">
+            </section>
+            <section>
+                <p>And don't forget to make it compatible with Linux, Windows, and Mac OS.</p>
+
+                <p class="fragment"><img class="nobordernobackground" width="120" height="200" data-src="img/minion.png" alt="OK"/></p>
+
+                <p class="fragment"><a href="https://github.com/riptano/cdt" target="_blank">Available here.</a>
+                    <br/>
+                    Collaborated with Martin Van Ryswyk.
+                </p>
+            </section>
+        </section>
+
+        <section>
+            <h2 class="slide-title-b">DSE Graph &amp; Java Driver</h2>
+            <section>
+                <p><blockquote class="nobordernobackground">The Graphter is coming.</blockquote></p>
+                <p class="fragment">The DataStax Java Driver has to adapt to survive.</p>
+            </section>
+            <section>
+                <ul>
+                    <li>Graph data model is much more dynamic.</li>
+                    <li class="fragment">A subprotocol will be used within the Native protocol.</li>
+                    <li class="fragment">The drivers have to be able to decode that.</li>
+                    <li class="fragment">Provide a meaningful API to match these new possiblities.</li>
+                </ul>
+            </section>
+            <section>
+                Work in progress.
+            </section>
+
+        </section>
+        <span id="copyright-text-left">Université Pierre et Marie Curie</span>
+        <span id="copyright-text-center">Live here : <a href="kgdo.me/sar-live">kgdo.me/sar-live</a></span>
+        <span id="page-number"></span>
+    </div>
+
+</div>
+
+<script src="lib/js/head.min.js"></script>
+<script src="js/reveal.js"></script>
+
+<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+                multiplex: {
+                    id: 'fb074ce72a2a370b',
+                    secret: null,
+                    url: 'kgdo.me:1948'
+                },
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, condition: function() { return !!document.querySelector( 'pre code' ); }, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true },
+                    { src: '//cdnjs.cloudflare.com/ajax/libs/socket.io/0.9.17/socket.io.min.js', async: true },
+                    { src: 'plugin/multiplex/client.js', async: true },
+				]
+			});
+
+
+
+
+
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,224 @@
+/**
+  * CSS styles for DataStax Intern Showcase: Dev Tools & Drivers (Summer 2015)
+  *
+  * @author Kevin Gallardo
+  * @author Jiangcheng Oliver Chu
+  *
+ **/
+
+/** DataStax colors **/
+.bosworth-blue {
+    color: #337c99;
+}
+
+.olivier-orange {
+    color: #cb6015;
+}
+
+.yehlen-yellow {
+    color: #ddae54;
+}
+
+.mercado-maroon {
+    color: #4b3c37;
+}
+
+.mahony-monochrome {
+    color: #000000;
+}
+
+.aidan-astrological {
+    color: #9fa1a4;
+}
+
+/** DataStax styles */
+h3.title-primary {
+   font-size: 32pt;
+   color: #cb6015;
+}
+
+.subtitle-primary {
+   font-size: 20pt;
+   color: #000000;
+}
+
+h2.slide-title {
+   font-size: 28pt; /* 24pt */
+   color: #cb6015;
+   text-align: left;
+}
+
+h2.slide-title-b {
+   font-size: 28pt; /* 24pt */
+   color: #cb6015;
+   text-align: left;
+}
+
+h2.slide-title::after {
+   position: absolute;
+   top: -18px;
+   left: 85%;
+   content: url('../img/datastax-official-logo-tiny.png');
+}
+
+h2.slide-title-b::after {
+   position: absolute;
+   top: 0;
+   left: 85%;
+   content: url('../img/datastax-official-logo-tiny.png');
+}
+
+a {
+   color: #9fa1a4;
+}
+
+a:hover {
+   color: #9fa1a4;
+}
+
+
+#toc {
+    border: 2px white solid;
+}
+
+.toc-td {
+    color: #cb6015;
+}
+
+#copyright-text-left {
+   position: absolute;
+   top: 94%;
+   left: -8%;
+   color: #9fa1a4;
+   font-size: 12pt;
+}
+
+#copyright-text-center {
+   position: absolute;
+   top: 94%;
+   left: 41%;
+   color: #9fa1a4;
+   font-size: 12pt;
+}
+
+#page-number {
+   position: absolute;
+   top: 94%;
+   left: 100%;
+   color: #9fa1a4;
+   font-size: 14pt;
+}
+
+#jenkins-analytics {
+   position: absolute;
+   top: 94%;
+   left: 64%;
+   color: #337c99;
+   font-size: 14pt;
+}
+
+/** CSS **/
+#authors {
+    font-size: 0.78em;
+}
+
+#main-logo {
+    box-shadow            : 0px 0px 48px #ffffff ;
+    border-radius         : 12px                 ;
+    -moz-border-radius    : 12px                 ;
+    -webkit-border-radius : 12px                 ;
+}
+
+#job-creator-diagram {
+    box-shadow            : 0px 0px 14px #e6e6e6 ;
+    border-radius         : 12px                   ;
+    -moz-border-radius    : 12px                   ;
+    -webkit-border-radius : 12px                   ;
+}
+
+#job-creator-internals {
+    box-shadow            : 0px 0px 14px #e6e6e6 ;
+    border-radius         : 12px                   ;
+    -moz-border-radius    : 12px                   ;
+    -webkit-border-radius : 12px                   ;
+}
+
+#build-yaml {
+    text-transform: none;
+}
+
+#build-yaml-code {
+    font-family           : 'Ubuntu Mono' ;
+    font-size             : 1.1em         ;
+    height                : 337px         ;
+    border-radius         : 12px          ;
+    -moz-border-radius    : 12px          ;
+    -webkit-border-radius : 12px          ;
+    overflow              : hidden        ;
+}
+
+#dsl-code {
+    font-family           : 'Ubuntu Mono' ;
+    font-size             : 1.1em         ;
+    height                : 380px         ;
+    width                 : 485px         ;
+    border-radius         : 12px          ;
+    -moz-border-radius    : 12px          ;
+    -webkit-border-radius : 12px          ;
+    overflow              : hidden        ;
+}
+
+#code-repr {
+    border-collapse : collapse        ;
+    border          : 3px solid gray  ;
+    font-family     : 'Ubuntu Mono'   ;
+    font-size       : 0.6em           ;
+    height          : 384px           ;
+}
+
+td.aligned {
+    text-align       : center          ;
+    vertical-align   : top             ;
+    border           : 3px solid gray  ;
+    color            : black           ;
+    background-color : white           ;
+}
+
+td.inverted_aligned {
+    text-align       : center          ;
+    vertical-align   : top             ;
+    border           : 3px solid gray  ;
+    color            : black           ;
+    background-color : white           ;
+}
+
+#build-yaml-advantages {
+    font-size: 0.8em;
+}
+
+#dsl-advantages {
+    font-size: 0.8em;
+}
+
+.table-of-contents {
+    color: #a9a9a9; /* DarkGray, which is actually lighter than HTML 'gray' */
+}
+
+
+
+.listed-topics {
+    color: #808080; /* HTML 'gray' */
+}
+
+.no-all-caps {
+    text-transform: none; /* prevents text from showing in ALL CAPS */
+}
+
+.emphasized {
+    font-style: italic;
+}
+
+.important {
+    font-weight: bold;
+}
+
