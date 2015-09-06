@@ -276,6 +276,20 @@ end</code></pre>
             <section>
                 <img id="job-creator-internals" data-src="img/job-creator-internals.png">
             </section>
+            <section>
+                <p>Overview of the API :</p>
+                <pre><code id="dseg-code">
+                    Cluster cluster = Cluster.builder().addContactPoint("127.0.0.1").build();
+                    GraphSession session = new GraphSession(cluster.connect());
+
+                    GraphStatement gs = new GraphStatement("g.V()");
+                    GraphResultSet grs = session.execute(gs);
+
+                    for (GraphTraversalResult gtr : grs) {
+                    System.out.println("gtr.get() = " + gtr.get("result").get("properties").get("name").get(0).get("value"));
+                    }
+                </code></pre>
+            </section>
         </section>
 
         <section id="part2">

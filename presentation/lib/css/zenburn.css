@@ -5,10 +5,14 @@ based on dark.css by Ivan Sagalaev
 
 */
 
-.hljs {
+
+/* TODO change theme !!!
+*/
+
+.hljs{
   display: block; padding: 0.5em;
   background: white;
-  color: #DCDCDC;
+  color: black;
 }
 
 .hljs-keyword,
@@ -20,25 +24,25 @@ based on dark.css by Ivan Sagalaev
 .hljs-request,
 .hljs-status,
 .clojure .hljs-attribute {
-  color: #E3CEAB;
+  color: #003333;
 }
 
 .django .hljs-template_tag,
 .django .hljs-variable,
 .django .hljs-filter .hljs-argument {
-  color: #DCDCDC;
+  color: black;
 }
 
 .hljs-number,
 .hljs-date {
-  color: #8CD0D3;
+  color: #538192;
 }
 
 .dos .hljs-envvar,
 .dos .hljs-stream,
 .hljs-variable,
 .apache .hljs-sqbracket {
-  color: #EFDCBC;
+  color: #ff0055;
 }
 
 .dos .hljs-flow,
@@ -47,7 +51,7 @@ based on dark.css by Ivan Sagalaev
 .python .hljs-built_in,
 .hljs-literal,
 .tex .hljs-special {
-  color: #EFEFAF;
+  color: black;
 }
 
 .diff .hljs-chunk,
@@ -65,14 +69,14 @@ based on dark.css by Ivan Sagalaev
 .nginx .hljs-built_in,
 .tex .hljs-command,
 .hljs-prompt {
-    color: #efef8f;
+    color: #003333;
 }
 
 .dos .hljs-winutils,
 .ruby .hljs-symbol,
 .ruby .hljs-symbol .hljs-string,
 .ruby .hljs-string {
-  color: #DCA3A3;
+  color: #503d15;
 }
 
 .diff .hljs-deletion,
@@ -112,6 +116,48 @@ based on dark.css by Ivan Sagalaev
 .xml .vbscript,
 .xml .css,
 .xml .hljs-cdata {
-  opacity: 0.5;
+  opacity: 1;
 }
 
+/* Hemisu Dark */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/* Original theme - http://noahfrederick.com/vim-color-scheme-hemisu/ */
+/* http://jmblog.github.com/color-themes-for-google-code-highlightjs */
+/*
+.hemisu-comment, pre .comment, pre .xml .doctype, pre .html .doctype {
+  color: #999999;
+}
+
+.hemisu-accent1, pre .number, pre .ruby .keyword {
+  color: #538192;
+}
+
+.hemisu-accent2, pre .string, pre .regexp, pre .xml .value, pre .html .value {
+  color: #739200;
+}
+
+.hemisu-accent3, pre .keyword, pre .title, pre .constant, pre .xml .tag, pre .html .tag, pre .css .rules .attribute {
+  color: #ff0055;
+}
+
+.hemisu-accent4 {
+  color: #503d15;
+}
+
+pre code {
+  display: block;
+  background: white;
+  color: #111111;
+  font-family: Menlo, Monaco, Consolas, monospace;
+  line-height: 1.5;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+pre .xml .tag .title {
+  color: #111111;
+}
+pre .html .tag .title {
+  color: #111111;
+}
+
+*/

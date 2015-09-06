@@ -33,8 +33,6 @@
     <script type="text/javascript" src="js/ds-showcase.js"></script>
 
 
-    <!-- Fonts -->
-    <link href='http://fonts.googleapis.com/css?family=Ubuntu+Mono' rel='stylesheet' type='text/css'>
 </head>
 
 <!-- When this page loads, run the main function: -->
@@ -121,18 +119,18 @@
         <section>
             <h2 class="slide-title-b">Java Driver</h2>
             <section>
-                <p>Goal : Establish connection to a cluster and send statements.</p>
+                <p>Driver's purpose : Establish connection to a cluster and send statements.</p>
                 <ul>
                     <li class="fragment">Native protocol && CQL</li>
                     <li class="fragment">Connection pools</li>
                     <li class="fragment">Netty</li>
-                    <li class="fragment">Policies<span class="fragment"> (Load Balancing</span><span class="fragment">, Retry</span><span class="fragment">, Reconnection)</span></li>
+                    <li class="fragment">Policies<span class="fragment"> (Load Balancing</span><span class="fragment">, Retries</span><span class="fragment">, Reconnections)</span></li>
                     <li class="fragment">Many other useful tuning options, Object Mapper and Query Builder.</li>
                 </ul>
             </section>
 
             <section>
-                <p>First topic of the internship : contribute to the awesomeness of the driver</p>
+                <p>Internship's assignment : contribute to the awesomeness of the driver</p>
                 <ul>
                     <li><p class="fragment">Involved in the last 2.x versions : 2.0.10 ; 2.0.11 ; 2.1.7 ; 2.2</p></li>
                     <li><p class="fragment">New Retry Policies,<span class="fragment"> lots of improvements for the Object Mapper,</span><span class="fragment"> expose Paging State API,</span><span
@@ -150,7 +148,7 @@
                 <p class="fragment">Meh, ok.</p>
             </section>
             <section>
-                <p>Let's do it efficiently, using nmap<span class="fragment">, multi-threading</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span>
+                <p>Let's do it efficiently<span class="fragment">, using nmap</span><span class="fragment">, multi-threading</span><span class="fragment"> and the Java Driver</span><span class="fragment">, so a scan of a sub-network of 65,536 ip addresses takes less than 2 minutes.</span>
                 </p>
 
                 <p class="fragment">Meh, ok.</p>
@@ -182,6 +180,7 @@
                 <p class="fragment">The DataStax Java Driver has to adapt to survive.</p>
             </section>
             <section>
+                <p>Concept</p>
                 <ul>
                     <li>Graph data model is much more dynamic.</li>
                     <li class="fragment">A subprotocol will be used within the Native protocol.</li>
@@ -190,10 +189,22 @@
                 </ul>
             </section>
             <section>
+                <p>Work</p>
                 <ul>
-                    <li class="fragment">Java Driver will be the first to make such integration.</li>
-                    <li class="fragment">Design document.</li>
-                    <li class="fragment">Built a first working prototype</li>
+                    <li>Java Driver is the first to make such integration.</li>
+                    <li class="fragment">Need for a Design document for unified approach.</li>
+                    <li class="fragment">Collaborated with the Graph team to fix bugs on DSE Graph.</li>
+                    <li class="fragment">Built a first working prototype.</li>
+                </ul>
+            </section>
+
+            <section>
+                <p>Solution</p>
+                <ul>
+                    <li>Wrapping the existing main classes of the driver (i.e. Session, Statements, ResultSet)</li>
+                    <li class="fragment">Prevent use of metadatas</li>
+                    <li class="fragment">Encode Prepared statements arguments in JSON</li>
+                    <li class="fragment">Decode JSON results and add an API to run transparently through the result.</li>
                 </ul>
             </section>
             <section>
@@ -208,7 +219,6 @@ GraphResultSet grs = session.execute(gs);
 for (GraphTraversalResult gtr : grs) {
     System.out.println("gtr.get() = " + gtr.get("result").get("properties").get("name").get(0).get("value"));
 }
-
                 </code></pre>
             </section>
 
@@ -233,7 +243,7 @@ for (GraphTraversalResult gtr : grs) {
 				history: true,
 				center: true,
 
-				transition: 'slide', // none/fade/slide/convex/concave/zoom
+				transition: 'convex', // none/fade/slide/convex/concave/zoom
 
                 multiplex: {
                     id: 'fb074ce72a2a370b',

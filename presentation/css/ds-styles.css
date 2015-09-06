@@ -157,6 +157,16 @@ a:hover {
     overflow              : hidden        ;
 }
 
+#dseg-code {
+    background-color : white;
+    font-size             : 0.9em         ;
+    border-radius         : 12px          ;
+    -moz-border-radius    : 12px          ;
+    -webkit-border-radius : 12px          ;
+    overflow              : hidden        ;
+    color : #757575;
+}
+
 #dsl-code {
     font-family           : 'Ubuntu Mono' ;
     font-size             : 1.1em         ;
@@ -202,16 +212,6 @@ td.inverted_aligned {
 
 .table-of-contents {
     color: #a9a9a9; /* DarkGray, which is actually lighter than HTML 'gray' */
-}
-
-#white-background {
-    font-family           : 'Ubuntu Mono' ;
-    font-size             : 0.7em         ;
-    height                : 337px         ;
-    border-radius         : 12px          ;
-    -moz-border-radius    : 12px          ;
-    -webkit-border-radius : 12px          ;
-    overflow              : hidden        ;
 }
 
 
